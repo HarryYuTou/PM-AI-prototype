@@ -1,30 +1,30 @@
 # ShelfCheck — Library Board Game Return Checks
 
-一个按游戏副本核对组件的网页原型。围绕 PRD 的最小闭环实现：**副本建档 → 归还拍照 → 逐项人工确认 → 可上架 / 暂缓上架 → 保存检查记录**。
+A web prototype for checking the components of individual library board game copies. It implements the core workflow defined in the PRD: **set up a copy → photograph its returned contents → confirm each component count → mark ready to shelve or hold for follow-up → save the check**.
 
-## 本地启动
+## Run locally
 
-使用 Node.js 26 或更高版本（本项目在 26.8.1 下验证）。应用本身没有第三方运行时依赖。
+Use Node.js 26 or later. The project was verified with Node.js 26.8.1. The application has no third-party runtime dependencies.
 
 ```sh
 npm run dev
 ```
 
-浏览器打开 <http://localhost:4173>。默认只监听本机。端口被占用时可以运行 `PORT=4174 npm run dev`。
+Open <http://localhost:4173> in your browser. The server listens only on the local machine. If the port is already in use, run `PORT=4174 npm run dev`.
 
-### 配置 Anthropic API Key
+### Configure an Anthropic API key
 
-在项目根目录的 `.env` 文件中，将 Key 填到等号后面：
+In the `.env` file at the project root, enter your key after the equals sign:
 
 ```dotenv
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ```
 
-`.env` 是隐藏文件，macOS Finder 中可按 `Command + Shift + .` 显示。该文件已被 Git 忽略，不能提交真实 Key。新克隆的仓库可以将 `.env.example` 复制为 `.env` 后填写。
+The `.env` file is hidden. In macOS Finder, press `Command + Shift + .` to show hidden files. Git ignores this file; never commit a real API key. After cloning the repository, copy `.env.example` to `.env` and enter your key there.
 
-`npm run dev` 和 `npm start` 会在启动时读取 `.env`；更改后需重启服务。**当前只是准备配置位置，真实图片识别 API 尚未接入，填写 Key 不会自动触发调用或费用。** 离线 HTML 不包含也不读取这个文件。
+Both `npm run dev` and `npm start` load `.env` at startup. Restart the server after changing it. **This only prepares the configuration: the image recognition API is not connected yet, and entering a key does not trigger API calls or charges.** The offline HTML preview neither includes nor reads this file.
 
-需要测试时先安装开发依赖：
+To run the checks and tests, first install the development dependencies:
 
 ```sh
 npm ci
@@ -32,38 +32,38 @@ npm run check
 npm test
 ```
 
-生成单文件离线预览：
+To generate a standalone offline preview:
 
 ```sh
 npm run build
 ```
 
-输出为 `dist/index.html`，已内嵌样式、脚本和示例图。可尝试直接用浏览器打开；若浏览器限制本地文件的 IndexedDB，请使用上面的 HTTP 启动方式。两种打开方式的数据不共享。
+The output is `dist/index.html`, with styles, scripts, and sample illustrations embedded. You can try opening it directly in a browser. If the browser restricts IndexedDB for local files, use the HTTP server described above. The two preview methods do not share stored data.
 
-## 已实现
+## Implemented features
 
-- **副本建档**：游戏名称、唯一条码、参考照片、组件分组与应有数量、人工清点标记、完整库存确认。
-- **副本查找**：条码输入框和侧栏副本列表。输入框可接收模拟扫码输入；未实现相机扫码。
-- **归还照片**：上传或拖入 JPG / PNG / WebP（最多 12 MB）；处理后长边不超过 1800 px，保存在本地；可切换参考图并放大查看。
-- **核对清单**：应有数量、识别建议数量、工作人员实际数量、匹配 / 疑似缺件 / 额外组件 / 无法确认状态。
-- **人工最终确认**：每组都需输入有效数量并确认；数量更改会取消该组的确认。全部匹配才可标记可上架；缺件可标记暂缓上架。没有缺件但要暂缓时需说明原因。
-- **保存记录**：副本条码、游戏名称、时间、照片、当时的库存快照、工作人员确认的实际数量、缺件数量、备注和处理状态。
-- **历史面板**：查看当前副本的历史记录、缺件和当时的照片。
-- **输入与错误处理**：重复条码、无效数量、照片格式/大小/损坏、存储失败、重复提交、切换时的未保存提醒。
+- **Copy setup:** game name, unique barcode, reference photo, component groups and expected quantities, manual-count flags, and confirmation of the complete inventory.
+- **Copy lookup:** a barcode input and a sidebar list of copies. The input supports simulated barcode entry; camera-based barcode scanning is not implemented.
+- **Return photos:** upload or drag in JPG, PNG, or WebP images up to 12 MB. Images are resized to a maximum long edge of 1800 px and stored locally. Switch between return and reference images or enlarge them for inspection.
+- **Review checklist:** expected quantities, suggested recognition counts, staff-verified counts, and statuses for matching counts, possible shortages, extra pieces, or uncertain counts.
+- **Staff confirmation:** every component group requires a valid count and explicit confirmation. Editing a count clears that group's confirmation. A copy can be marked ready to shelve only when every count matches. Missing pieces can be recorded by holding the copy for follow-up. A hold without a shortage requires a reason.
+- **Saved records:** copy barcode, game name, timestamp, return photo, an inventory snapshot, staff-confirmed counts, missing quantities, notes, and final disposition.
+- **Check history:** view previous checks, missing pieces, and saved return photos for the selected copy.
+- **Validation and error handling:** duplicate barcodes, invalid counts, unsupported or oversized images, image decoding errors, storage failures, duplicate submissions, and warnings before discarding an unsaved check.
 
-## 图片识别：明确的占位实现
+## Image recognition placeholder
 
-入口在 `src/recognition.js` 的 `recognizeComponents()`。
+The integration entry point is `recognizeComponents()` in `src/recognition.js`.
 
-**目前不调用任何识别服务，也不分析图片。**
+**The current prototype does not call a recognition service or analyze images.**
 
-- 自带的 **Harbor Trail / SC-001** 是虚构示例副本；托盘图片是示意插画，不是真实照片。
-- 只在这个示例副本使用示例图片时，提供三组固定演示结果：完整、缺少一枚棋子、板块重叠。
-- 所有示例场景中的卡牌都要人工清点，不能根据卡牌堆判断张数。
-- 上传任意真实照片后，所有识别数量保持未知，进入人工核对；不会套用示例结果。
-- 工作人员可纠正所有建议数量。系统保留建议值与实际值的区别。
+- **Harbor Trail / SC-001** is a fictional sample copy. Its tray images are illustrations, not real photographs.
+- Fixed demo results are available only when using this sample copy with its built-in illustrations. The three scenarios are a complete game, one missing pawn, and overlapping tiles.
+- Cards require a manual count in every demo scenario; a stack of cards does not reveal its quantity.
+- Uploading any real photo leaves all recognition counts unknown and opens a manual review. Demo results are never applied to uploaded photos.
+- Staff can correct every suggested count. The application preserves the distinction between the initial suggestion and the verified count.
 
-后续接入 API 的建议边界：浏览器将归还图片、该副本参考图片及已确认库存传给服务端；服务端调用视觉模型；返回各组件 ID、可见数量（未知为 `null`）和说明。组件的**应有数量继续以工作人员建档的清单为准**。
+For a future API integration, the browser should send the return photo, the copy's reference photo, and its confirmed inventory to the server. The server should call a vision model and return each component ID, visible count (`null` when unknown), and an explanation. **Expected quantities must continue to come from the inventory confirmed by staff during setup.**
 
 ```json
 {
@@ -74,33 +74,33 @@ npm run build
 }
 ```
 
-接入时还需增加服务端 API 路由、超时/错误处理和真实识别模式的界面文案。API Key 只能放在服务端环境变量中，不能写进 `src/`、浏览器代码或 Git 仓库。目前 `server.mjs` 仅提供静态文件。
+Integration will also require a server-side API route, timeout and error handling, and interface labels for live recognition. API keys must remain in server-side environment variables and must never appear in `src/`, browser code, or the Git repository. Currently, `server.mjs` only serves static files.
 
-## 数据和范围
+## Data and scope
 
-- 副本和检查记录保存在 **当前浏览器的 IndexedDB**，刷新后可以保留。
-- 不同浏览器、设备、域名或端口之间不共享数据；清除网站数据会删除记录。它不是多人共享数据库。
-- 原型没有借阅人身份、馆藏系统集成、损坏检查、自动上架决定、通知或罚款。
-- 按 PRD 的 Product Scope 实现；JTBD 中的自动借阅人关联和 condition 记录不属于本原型的承诺。
-- 一张照片只检查可见组件。卡牌、遮挡及大量细小组件需人工清点。
+- Copies and check records are stored in **the current browser's IndexedDB** and persist across page refreshes.
+- Data is not shared across browsers, devices, domains, or ports. Clearing site data removes the records. This is not a shared multi-user database.
+- The prototype does not include borrower identities, catalog integration, damage assessment, automatic shelving decisions, notifications, or fines.
+- Implementation follows the PRD's Product Scope. Automatic borrower association and condition records mentioned in the JTBD section are outside this prototype's scope.
+- A photo can only support checks of visible components. Card decks, obscured pieces, and large sets of small components require manual counting.
 
-## 验证范围
+## Verification coverage
 
-自动化验证覆盖业务规则、真实页面 DOM 事件流程、持久化适配器的事务语义及静态文件路由。DOM 测试使用 jsdom，存储和图片解码采用测试替身；测试不等同于真实浏览器摄像头、图片解码、IndexedDB 或视觉布局验收。
+Automated checks cover business rules, the application's DOM event flows, transaction handling in the persistence adapter, and static file routes. DOM tests use jsdom, with test doubles for storage and image decoding. They do not replace real-browser testing of camera input, image decoding, IndexedDB persistence, or visual layout.
 
-当前执行环境拒绝监听本地 HTTP 端口，浏览器安全策略也拒绝本地文件预览，因此**尚未完成真实浏览器视觉检查和实际浏览器持久化验收**。在普通终端启动后，请按 `ACCEPTANCE.md` 完成最后一轮验收。
+The development environment blocked local HTTP listeners and browser access to local file previews, so **automated real-browser visual and persistence acceptance checks could not be completed there**. Start the application from a regular terminal and follow `ACCEPTANCE.md` for browser acceptance testing.
 
-## 文件结构
+## Project structure
 
-| 文件 | 职责 |
+| File | Purpose |
 | --- | --- |
-| `index.html` / `styles.css` | 页面入口、响应式布局与视觉样式 |
-| `src/app.js` | 页面渲染、表单、照片上传和检查流程 |
-| `src/domain.js` | 库存校验、数量比较、最终判定与记录快照 |
-| `src/recognition.js` | 图片识别占位与固定演示场景 |
-| `src/storage.js` | IndexedDB 的副本与检查记录 |
-| `src/images.js` | 上传校验、缩放和本地图片处理 |
-| `src/seed.js` / `assets/` | 虚构样例库存与示意图 |
-| `server.mjs` | 仅本机可访问的静态开发服务 |
-| `tests/` | 业务、DOM 流程、存储适配器与路由测试 |
+| `index.html` / `styles.css` | Page entry point, responsive layout, and visual styles |
+| `src/app.js` | Rendering, forms, photo uploads, and the check-in workflow |
+| `src/domain.js` | Inventory validation, count comparisons, final decisions, and record snapshots |
+| `src/recognition.js` | Recognition placeholder and fixed demo scenarios |
+| `src/storage.js` | IndexedDB storage for copies and check records |
+| `src/images.js` | Upload validation, resizing, and local image processing |
+| `src/seed.js` / `assets/` | Fictional sample inventory and illustrations |
+| `server.mjs` | Static development server accessible only from the local machine |
+| `tests/` | Business rules, DOM workflows, storage adapter, and route tests |
 

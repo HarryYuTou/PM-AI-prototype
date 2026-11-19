@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#244c3e" />
+    <meta name="description" content="A thoughtful check-in workspace for library board games. Compare copy-specific inventories, review pieces, and save return checks." />
+    <title>ShelfCheck · Library return checks</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/src/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to return check</a>
+    <div id="app"><main class="startup"><img src="/favicon.svg" width="48" height="48" alt=""/><h1>ShelfCheck</h1><p>Opening your check-in workspace…</p></main></div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <dialog id="setup-dialog" aria-labelledby="setup-title"></dialog>
+    <dialog id="photo-dialog" class="photo-dialog" aria-labelledby="photo-title"></dialog>
+    <noscript><p class="startup">Enable JavaScript to use ShelfCheck.</p></noscript>
+  </body>
+</html>
